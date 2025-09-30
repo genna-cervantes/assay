@@ -1,0 +1,128 @@
+eval: Eval = createEval({
+    name: string
+    target: async func
+    cases: Case | Case[]
+    evaluators: Evaluator | Evaluator[]
+    metrics: Metric | Metric[]
+})
+
+EvalRunOptions = {
+    run(): Promise<EvalRunResult>
+}
+
+EvalRunResult = {
+    evaluations: EvaluatorResult[]
+    metrics: Metrics<>
+}
+
+Case = {
+    input: string
+    expected: {
+        key<K>: value<T>
+        toolCalls: {
+            toolName: string
+            toolArgs: <T> // should be inferred from the agent input
+            toolResult: <T> // should be inferred from the agent input
+        }[]
+    }<{K:V}>
+}
+
+Evaluator = {
+    async ({
+        key<K>: value<V>
+    }: {
+        K: V
+    }) => EvaluatorResult
+
+    llmAsJudge = ({
+        criteria: string
+        model: enum() // available models
+        rubric?: {
+            key<K>: value<T>
+        }
+    }) => EvaluatorResult
+
+    toolCallValidator = ({
+        exact: boolean
+        allowExtra: boolean
+    }) => EvaluatorResult
+
+    contains = ({
+        values: string[]
+        caseSensitive: boolean
+    }) => EvaluatorResult
+
+    regex = ({
+        pattern: string
+    }) => EvaluatorResult
+
+    exactMatch = ({
+        caseSensitive?: boolean
+        ignoreWhitespace?: boolean
+    }) => EvaluatorResult
+
+    semanticSimilarity = ({
+        threshold: number
+        model: enum() // model to support
+        metric?: enum() // metric to support
+    }) => EvaluatorResult
+}
+
+EvaluatorResult = {
+    id: string
+    score: number // from 0 to 1 only
+    threshold: number
+    passed: boolean
+    reason?: string
+    confidence?: number
+}
+
+Metrics = {
+    score: {
+        avg: number;
+        min: number;             
+        max: number;             
+        passRate: number
+    }
+    latency: {
+        avg: number;
+        min: number;             // Fastest test
+        max: number;             // Slowest test
+        p50: number;             // Median
+        p95: number;
+        p99: number;             // Add: for outlier detection
+        total: number;           // Total time for all tests
+    };
+    tokens: {
+        total: number;
+        avg: number;             // Add: per test
+        min: number;
+        max: number;
+        byModel?: Record<string, number>;  // If using multiple models
+    };
+    cost: {
+        total: number;           // Rename from totalCost
+        avg: number;             // Rename from estimatedCost
+        byModel?: Record<string, number>;
+        breakdown?: {
+        input: number;
+        output: number;
+        cached?: number;
+        };
+    };
+    toolCalls?: {
+        total: number;           // Rename from toolCallCount
+        avg: number;             // Per test
+        byTool: Record<string, number>;    // Which tools used most
+        successRate: number;     // % of successful tool calls
+    };
+    execution: {
+        totalTests: number;
+        passed: number;
+        failed: number;
+        errors: number;          // Tests that threw errors
+        skipped?: number;
+        duration: number;        // Total execution time
+    };
+}
+

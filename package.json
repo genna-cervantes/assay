@@ -1,0 +1,24 @@
+{
+  "name": "assay",
+  "version": "1.0.0",
+  "description": "a lightweight typescript ai evals toolkit",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/genna-cervantes/assay.git"
+  },
+  "keywords": [
+    "ai",
+    "evals",
+    "typescript"
+  ],
+  "author": "Genna Cervantes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/genna-cervantes/assay/issues"
+  },
+  "homepage": "https://github.com/genna-cervantes/assay#readme"
+}
